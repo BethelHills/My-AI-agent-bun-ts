@@ -1,7 +1,8 @@
 import { google } from '@ai-sdk/google';
-import { generateText, streamText, tool } from 'ai';
+import { generateText, streamText, tool, stepCountIs } from 'ai';
 import { z } from 'zod';
-import { SYSTEM_PROMPT } from './prompts.js';
+import { SYSTEM_PROMPT, CODE_REVIEWER_PROMPT } from './prompts.js';
+import { getFileChangesInDirectoryTool } from './tools.js';
 
 // Initialize the AI agent
 class AIAgent {
@@ -89,6 +90,23 @@ class AIAgent {
       return { text: 'Sorry, I encountered an error while processing your request.', toolCalls: [] };
     }
   }
+
+  // Code Review Agent - The Avengers Assemble!
+  async codeReviewAgent(prompt: string) {
+    const result = streamText({
+      model: google("models/gemini-2.5-flash"),
+      prompt,
+      system: SYSTEM_PROMPT,
+      tools: {
+        getFileChangesInDirectoryTool: getFileChangesInDirectoryTool,
+      },
+      stopWhen: stepCountIs(10),
+    });
+
+    for await (const chunk of result.textStream) {
+      process.stdout.write(chunk);
+    }
+  }
 }
 
 // Create agent instance
@@ -139,6 +157,17 @@ async function main() {
   if (toolResponse.toolCalls.length > 0) {
     console.log('Tools used:', toolResponse.toolCalls.map(tc => tc.toolName));
   }
+  console.log('\n' + '='.repeat(50) + '\n');
+
+  // Example 4: Code Review Agent
+  console.log('🦸 Code Review Agent:');
+  const codeReviewResponse = await agent.codeReviewAgent(
+    'Please review the code changes in the current directory and provide feedback.'
+  );
+  console.log('Code Review:', codeReviewResponse.text);
+  if (codeReviewResponse.toolCalls.length > 0) {
+    console.log('Tools used:', codeReviewResponse.toolCalls.map(tc => tc.toolName));
+  }
 }
 
 // Run the agent
@@ -147,3 +176,22 @@ if (import.meta.main) {
 }
 
 export { AIAgent };
+
+// Standalone Code Review Agent
+const codeReviewAgent = async (prompt: string) => {
+  const result = streamText({
+    model: google("models/gemini-2.5-flash"),
+    prompt,
+    system: SYSTEM_PROMPT,
+    tools: {
+      getFileChangesInDirectoryTool: getFileChangesInDirectoryTool,
+    },
+    stopWhen: stepCountIs(10),
+  });
+
+  for await (const chunk of result.textStream) {
+    process.stdout.write(chunk);
+  }
+};
+
+export { codeReviewAgent };
