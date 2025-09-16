@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { simpleGit } from "simple-git";
 import { z } from "zod";
-import { writeFileSync, mkdirSync, existsSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 
 const excludeFiles = ["dist", "bun.lock"];
@@ -26,10 +26,15 @@ const codeQualityAnalysis = z.object({
   language: z.string().optional().describe("Programming language (defaults to typescript)"),
 });
 
+const fileRead = z.object({
+  filePath: z.string().describe("The path to the file to read"),
+});
+
 type FileChange = z.infer<typeof fileChange>;
 type CommitMessage = z.infer<typeof commitMessage>;
 type MarkdownOutput = z.infer<typeof markdownOutput>;
 type CodeQualityAnalysis = z.infer<typeof codeQualityAnalysis>;
+type FileRead = z.infer<typeof fileRead>;
 
 async function getFileChangesInDirectory({ rootDir }: FileChange) {
   const git = simpleGit(rootDir);
@@ -192,6 +197,24 @@ async function analyzeCodeQuality({ codeContent, language = "typescript" }: Code
   };
 }
 
+async function readFile({ filePath }: FileRead) {
+  try {
+    const content = readFileSync(filePath, 'utf8');
+    return {
+      success: true,
+      content,
+      filePath,
+      message: `Successfully read file: ${filePath}`
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      message: `Failed to read file: ${filePath}`
+    };
+  }
+}
+
 export const getFileChangesInDirectoryTool = tool({
   description: "Gets the code changes made in given directory",
   inputSchema: fileChange,
@@ -214,4 +237,10 @@ export const analyzeCodeQualityTool = tool({
   description: "Analyzes code quality and provides scoring with suggestions",
   inputSchema: codeQualityAnalysis,
   execute: analyzeCodeQuality,
+});
+
+export const readFileTool = tool({
+  description: "Reads the content of a file",
+  inputSchema: fileRead,
+  execute: readFile,
 });

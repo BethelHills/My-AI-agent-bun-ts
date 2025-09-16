@@ -6,7 +6,8 @@ import {
   getFileChangesInDirectoryTool, 
   generateCommitMessageTool, 
   writeMarkdownFileTool,
-  analyzeCodeQualityTool
+  analyzeCodeQualityTool,
+  readFileTool
 } from "./tools";
 
 const codeReviewAgent = async (prompt: string) => {
@@ -19,6 +20,7 @@ const codeReviewAgent = async (prompt: string) => {
       generateCommitMessageTool: generateCommitMessageTool,
       writeMarkdownFileTool: writeMarkdownFileTool,
       analyzeCodeQualityTool: analyzeCodeQualityTool,
+      readFileTool: readFileTool,
     },
     stopWhen: stepCountIs(10),
   });
@@ -30,5 +32,5 @@ const codeReviewAgent = async (prompt: string) => {
 
 // Specify which directory the code review agent should review changes in your prompt
 await codeReviewAgent(
-  "Review the code changes in the current directory, make your reviews and suggestions file by file. For each file, also analyze the code quality and provide a quality score. After the review, generate a commit message for the changes and write the comprehensive review with quality scores to a markdown file called 'code-review.md'",
+  "Review the feature plan in 'feature-plan.md' and provide detailed feedback on the architecture, function signatures, security considerations, and performance considerations. Suggest improvements and identify potential issues. Also analyze the overall design quality and provide a quality score for the planning document.",
 );
