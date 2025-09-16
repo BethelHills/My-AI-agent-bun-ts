@@ -32,5 +32,5 @@ const codeReviewAgent = async (prompt: string) => {
 
 // Specify which directory the code review agent should review changes in your prompt
 await codeReviewAgent(
-  "Review the feature plan in 'feature-plan.md' and provide detailed feedback on the architecture, function signatures, security considerations, and performance considerations. Suggest improvements and identify potential issues. Also analyze the overall design quality and provide a quality score for the planning document.",
+  "Please read and review the following files: 'src/types/dashboard.types.ts', 'src/services/metricsService.ts', 'src/components/MetricsCard.tsx', and '.ai-rules.md'. Analyze the code for quality, performance, security, and adherence to the AI rules. Provide specific refactoring suggestions and identify any issues. Generate a comprehensive code review with quality scores.",
 );
