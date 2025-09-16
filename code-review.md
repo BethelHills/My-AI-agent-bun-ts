@@ -1,33 +1,83 @@
-# Code Review
+# Code Review Report
 
-## Changes in `index.ts`
+## Overview of Changes
 
-### Review:
-*   **Imports:** The new imports for `generateCommitMessageTool` and `writeMarkdownFileTool` are correctly added.
-*   **Tool Registration:** The new tools are properly registered within the `streamText` function's `tools` object.
-*   **Prompt Update:** The prompt has been updated to reflect the new capabilities, which is good for guiding the agent.
+This report details the code changes in the current directory, focusing on the introduction and integration of a new code quality analysis tool. The review provides file-by-file analysis, including code quality scores and actionable suggestions.
 
-## Changes in `tools.ts`
+## File-by-File Review
 
-### Review:
-*   **File System Imports:** The necessary `fs` and `path` imports are present.
-*   **Zod Schemas and Types:** `commitMessage` and `markdownOutput` schemas are well-defined, capturing the required arguments for the new tools. The corresponding TypeScript types (`CommitMessage`, `MarkdownOutput`) are also correctly inferred.
-*   **`generateCommitMessage` function:**
-    *   **Conventional Commit Structure:** The function correctly implements a conventional commit message structure including an emoji, type, and a short description.
-    *   **Emoji Mapping:** The `commitTypes` object provides a clear mapping of commit types to relevant emojis, enhancing readability.
-    *   **Timestamp:** Including a timestamp in the `fullMessage` is a good practice for traceability.
-    *   **Short Description:** The truncation logic for `shortDescription` is practical for concise commit summaries.
-*   **`writeMarkdownFile` function:**
-    *   **Directory Handling:** The function correctly handles both specified directories and defaults to the current working directory.
-    *   **Directory Creation:** The `mkdirSync(targetDir, { recursive: true })` ensures that the target directory exists before writing, preventing errors.
-    *   **File Extension:** The logic to ensure the filename ends with `.md` is a thoughtful detail, making the tool more robust.
-    *   **Error Handling:** The `try-catch` block provides basic error handling, which is important for production-ready code.
-*   **Tool Exports:** The new tools `generateCommitMessageTool` and `writeMarkdownFileTool` are correctly exported.
+### `index.ts`
 
-### Suggestions:
-*   **Error Handling in `getFileChangesInDirectory`:** While not part of these specific changes, it might be beneficial to add more robust error handling to `getFileChangesInDirectory` in `tools.ts` to gracefully manage scenarios where `simpleGit` operations might fail (e.g., not a git repository, network issues for remote repos, etc.). This is a general improvement, not directly related to the current diff.
-*   **`generateCommitMessage` - Custom Emojis/Templates:** For more advanced use cases, consider allowing a configurable set of emojis or even a custom template for commit messages. This could be passed as an optional parameter to the tool.
+**Review:**
+The `index.ts` file has been updated to incorporate the new `analyzeCodeQualityTool`. This involves importing the tool, registering it within the `codeReviewAgent`'s `tools` object, and modifying the agent's prompt to request code quality analysis and scores in the output. These changes correctly integrate the new functionality into the agent's workflow.
 
-## Overall Impression:
+**Code Quality Analysis:**
+- **Overall Score:** 8.5/10 (Grade: A)
+- **Breakdown:**
+    - Readability: 10/10
+    - Maintainability: 6/10
+    - Security: 10/10
+    - Performance: 8/10
+- **Metrics:**
+    - Total Lines: 38
+    - Non-empty Lines: 33
+    - Comment Lines: 1
+    - Comment Ratio: 2.6%
+    - Empty Line Ratio: 13.2%
+- **Structure:**
+    - Has Imports: Yes
+    - Has Exports: No
+    - Has Functions: Yes
+    - Has Classes: No
+    - Has Interfaces: No
+    - Has Types: No
+- **Security Concerns:**
+    - Has `console.log`: No
+    - Has `eval()`: No
+    - Has `innerHTML`: No
+- **Suggestions:**
+    - Consider adding more comments for better documentation.
+    - Consider adding exports for better modularity if parts of this file could be reused elsewhere.
 
-The changes introduce two valuable tools: `generateCommitMessageTool` and `writeMarkdownFileTool`. Both are well-implemented, with good attention to detail like input validation (via Zod), directory handling, and basic error management. The `generateCommitMessage` function adheres to conventional commit standards, and the `writeMarkdownFile` function is robust for its purpose. The `index.ts` updates correctly integrate these new tools into the agent's capabilities.
+---
+
+### `tools.ts`
+
+**Review:**
+The `tools.ts` file introduces the core logic for the new code quality analysis functionality. Key additions include:
+- A `codeQualityAnalysis` Zod schema and corresponding TypeScript type for input validation.
+- The `analyzeCodeQuality` asynchronous function, which performs a detailed analysis of provided code content. This function calculates various metrics (lines, comments, ratios), analyzes code structure (imports, exports, functions, classes, interfaces, types), and performs security checks (`console.log`, `eval()`, `innerHTML`).
+- The function also computes readability, maintainability, security, and performance scores, leading to an overall score and a letter grade.
+- Actionable suggestions are generated based on the analysis.
+- Finally, the `analyzeCodeQualityTool` is exported, making it available for use by other agents.
+
+The implementation of `analyzeCodeQuality` is comprehensive, covering many important aspects of code quality. The scoring logic and suggestion generation are well-thought-out.
+
+**Code Quality Analysis:**
+- **Overall Score:** 9.5/10 (Grade: A)
+- **Breakdown:**
+    - Readability: 10/10
+    - Maintainability: 10/10
+    - Security: 10/10
+    - Performance: 8/10
+- **Metrics:**
+    - Total Lines: 204
+    - Non-empty Lines: 175
+    - Comment Lines: 11
+    - Comment Ratio: 5.4%
+    - Empty Line Ratio: 14.2%
+- **Structure:**
+    - Has Imports: Yes
+    - Has Exports: Yes
+    - Has Functions: Yes
+    - Has Classes: Yes
+    - Has Interfaces: Yes
+    - Has Types: Yes
+- **Security Concerns:**
+    - Has `console.log`: No
+    - Has `eval()`: No
+    - Has `innerHTML`: No
+- **Suggestions:**
+    - Consider adding more comments for better documentation, especially for complex scoring logic or specific heuristic choices within the `analyzeCodeQuality` function.
+
+---

@@ -5,7 +5,8 @@ import { SYSTEM_PROMPT } from "./prompts";
 import { 
   getFileChangesInDirectoryTool, 
   generateCommitMessageTool, 
-  writeMarkdownFileTool 
+  writeMarkdownFileTool,
+  analyzeCodeQualityTool
 } from "./tools";
 
 const codeReviewAgent = async (prompt: string) => {
@@ -17,6 +18,7 @@ const codeReviewAgent = async (prompt: string) => {
       getFileChangesInDirectoryTool: getFileChangesInDirectoryTool,
       generateCommitMessageTool: generateCommitMessageTool,
       writeMarkdownFileTool: writeMarkdownFileTool,
+      analyzeCodeQualityTool: analyzeCodeQualityTool,
     },
     stopWhen: stepCountIs(10),
   });
@@ -28,5 +30,5 @@ const codeReviewAgent = async (prompt: string) => {
 
 // Specify which directory the code review agent should review changes in your prompt
 await codeReviewAgent(
-  "Review the code changes in the current directory, make your reviews and suggestions file by file. After the review, generate a commit message for the changes and write the review to a markdown file called 'code-review.md'",
+  "Review the code changes in the current directory, make your reviews and suggestions file by file. For each file, also analyze the code quality and provide a quality score. After the review, generate a commit message for the changes and write the comprehensive review with quality scores to a markdown file called 'code-review.md'",
 );
